@@ -15,39 +15,41 @@
   
 
 .encabezado {
-    min-height: 200px;
+    height: 100vh;
     overflow: hidden;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .encabezado__contenedor {
     display: flex;
     justify-content: center;
     align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
+    height: 100vh;
     padding: 2rem;
-    min-height: 200px;
 }
 
 .encabezado__titulo {
     position: relative;
-    font-size: 4.5rem;
+    font-size: 10rem;
     color: #000;
-    overflow: hidden;
-    padding: 0.5em;
     font-family: Monserrat;
+    cursor: pointer;
 }
 
 
 .encabezado__texto {
     display: block;
     transition: 
-        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-        opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     backface-visibility: hidden;
     transform-style: preserve-3d;
     will-change: transform, opacity;
+    letter-spacing: 0.5rem;
+    text-transform: uppercase;
 }
 
 .encabezado__texto--entrada {
@@ -56,7 +58,7 @@
 }
 
 .encabezado__texto--salida {
-    transform: translateY(-100%) rotateX(-15deg);
+    transform: translateY(100%) rotateX(15deg);
     opacity: 0;
 }
 

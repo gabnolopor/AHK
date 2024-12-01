@@ -1,12 +1,16 @@
-import React from 'react';
-import Header from './components/Header/Header';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import LandPage from './pages/LandPage';
+import BoxSelect from './pages/BoxSelect';
 
 function App() {
-    return (
-        <div className="App">
-            <Header />
-        </div>
-    );
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandPage />} />
+        <Route path="/boxselect" element={<BoxSelect />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
