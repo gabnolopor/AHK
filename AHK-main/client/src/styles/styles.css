@@ -81,12 +81,21 @@ box component
     position: relative;
     min-height: 100vh;
     overflow: hidden;
-    padding: 4rem;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #FDFDFD;  
+    background-color: #FDFDFD;
+    width: 100%;
+}
 
+.video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
 }
 
 .background-video {
@@ -94,21 +103,22 @@ box component
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 50%;
-    height: 50vh;
+    width: 100%;
+    height: 100vh;
     object-fit: cover;
-    z-index: 0;
+    transition: filter 0.3s ease;
 }
 
 .boxes__grid {
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 0.5rem;
-    height: 50vh;
-    width: 50%;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 3.5rem 2rem;
+    height: 100vh;
+    width: 30%;
+    padding: 1.5rem;
 }
 
 .box__sector {
@@ -116,52 +126,43 @@ box component
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.sector__content {
-    width: 100%;
-    height: 100%;
     cursor: pointer;
-    opacity: 0;
-    visibility: hidden;
 }
 
 .hover-modal {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: #FFFFFF;
+    background-color: transparent;
     padding: 1rem;
     text-align: center;
     text-transform: uppercase;
-    font-size: 1rem;
+    font-size: 2rem;
     font-family: Monserrat;
-    transition: all 0.5s ease;  
+    transition: all 0.5s ease;
     letter-spacing: 0.3rem;
     opacity: 0;
     visibility: hidden;
-    z-index: 2;
-    width: 80%;
-    height: 80%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  
-    cursor: pointer;
+    z-index: 3;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+.blur-active .background-video {
+    filter: blur(8px);
 }
 
 .box__sector:hover .hover-modal {
-    opacity: 0.9;
+    opacity: 1;
     visibility: visible;
-    transform: translate(-50%, -50%) scale(1.02); 
-    
 }
 
 @media (max-width: 768px) {
     .boxes__grid {
         grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(3, 1fr);
+        grid-template-rows: repeat(4, 1fr);
     }
 
     .hover-modal {
@@ -173,11 +174,43 @@ box component
 @media (max-width: 480px) {
     .boxes__grid {
         grid-template-columns: 1fr;
-        grid-template-rows: repeat(6, 1fr);
+        grid-template-rows: repeat(8, 1fr);
     }
 
     .hover-modal {
         font-size: 0.7rem;
         letter-spacing: 0.1rem;
     }
+}
+
+/* Add these new styles for the sliding panel */
+.paintwork-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: #FDFDFD;
+    z-index: 10;
+    transition: transform 0.5s ease;
+    transform: translateX(100%);
+    overflow-y: auto;
+    will-change: transform;
+    visibility: visible;
+}
+
+.paintwork-panel.open {
+    transform: translateX(0);
+}
+
+.paintwork-panel__close {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    font-size: 2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: black;
+    z-index: 11;
 }
