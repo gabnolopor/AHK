@@ -1,118 +1,92 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
-import Music from '../components/Music';
-import Photo from '../components/Photo';
-import Paintwork from '../components/Paintwork';
-import WrittenWorks from '../components/WrittenWorks';
-import Credits from '../components/Credits';
-import InteriorDesign from '../components/InteriorDesign';
+import '../styles/boxStyles.css';
 
 function BoxSelect() {
-  const [isPaintworkOpen, setIsPaintworkOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [lastTouchedBox, setLastTouchedBox] = useState(null);
 
   useEffect(() => {
-    if (isPaintworkOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
+    const checkMobile = () => {
+      setIsMobile(('ontouchstart' in window) || 
+                 (navigator.maxTouchPoints > 0) || 
+                 (navigator.msMaxTouchPoints > 0));
     };
-  }, [isPaintworkOpen]);
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleMouseEnter = () => {
-    setIsHovering(true);
-    document.querySelector('.video-container').classList.add('blur-active');
+    if (!isMobile) {
+      setIsHovering(true);
+      document.querySelector('.video-container').classList.add('blur-active');
+    }
   };
 
   const handleMouseLeave = () => {
-    setIsHovering(false);
-    document.querySelector('.video-container').classList.remove('blur-active');
+    if (!isMobile) {
+      setIsHovering(false);
+      document.querySelector('.video-container').classList.remove('blur-active');
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (isMobile) {
+      const touch = e.touches[0];
+      const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+      const boxSector = elements.find(el => el.classList.contains('box__sector'));
+      
+      if (boxSector) {
+        const boxIndex = parseInt(boxSector.dataset.index);
+        if (boxIndex !== lastTouchedBox) {
+          setLastTouchedBox(boxIndex);
+          setIsHovering(true);
+          document.querySelector('.video-container').classList.add('blur-active');
+        }
+      }
+    }
+  };
+
+  const handleTouchStart = (boxId) => {
+    if (isMobile) {
+      setIsHovering(true);
+      setLastTouchedBox(boxId);
+      document.querySelector('.video-container').classList.add('blur-active');
+    }
   };
 
   return (
-    <div className="box__wrapper">
+    <div 
+      className="box__wrapper"
+      onTouchMove={handleTouchMove}
+    >
       <div className="video-container">
         <video autoPlay muted loop playsInline className="background-video">
-          <source src="/bgPrototype.mp4" type="video/mp4" />
+          <source src="/bgPremier.mp4" type="video/mp4" />
           Tu navegador no soporta el elemento video.
         </video>
       </div>
 
       <div className="boxes__grid">
-        <div 
-          className="box__sector"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="hover-modal">Music</div>
-        </div>
-
-        <div 
-          className="box__sector"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="hover-modal">Photo</div>
-        </div>
-
-        <div 
-          className="box__sector"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          onClick={() => setIsPaintworkOpen(true)}
-        >
-          <div className="hover-modal">Paintwork</div>
-        </div>
-
-        <div 
-          className="box__sector"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="hover-modal">Written Works</div>
-        </div>
-
-        <div 
-          className="box__sector"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="hover-modal">Credits</div>
-        </div>
-
-        <div 
-          className="box__sector"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="hover-modal">Interior Design</div>
-        </div>
-
-        <div 
-          className="box__sector"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="hover-modal">New Section 1</div>
-        </div>
-
-        <div 
-          className="box__sector"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="hover-modal">New Section 2</div>
-        </div>
+        {[
+          'Music', 'Photo', 'Paintwork', 'Written Works',
+          'Credits', 'Interior Design', 'New Section 1', 'New Section 2'
+        ].map((text, index) => (
+          <div 
+            key={index}
+            data-index={index}
+            className={`box__sector ${lastTouchedBox === index ? 'touch-active' : ''}`}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onTouchStart={() => handleTouchStart(index)}
+          >
+            <div className="hover-modal">{text}</div>
+          </div>
+        ))}
       </div>
-
-      <Paintwork 
-        isOpen={isPaintworkOpen} 
-        onClose={() => setIsPaintworkOpen(false)}
-      />
     </div>
   );
 }
