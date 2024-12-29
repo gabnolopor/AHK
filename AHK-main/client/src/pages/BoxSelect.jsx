@@ -72,8 +72,8 @@ function BoxSelect() {
 
       <div className="boxes__grid">
         {[
-          'Music', 'Photo', 'Paintwork', 'Written Works',
-          'Credits', 'Interior Design', 'New Section 1', 'New Section 2'
+          'Music', 'Photo', 'Art', 'Writings',
+          'Credits', 'Design', 'New Section 1', 'New Section 2'
         ].map((text, index) => (
           <div 
             key={index}
