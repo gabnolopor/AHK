@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "AHK-mobile",
+    "slug": "AHK-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "entryPoint": "./App.tsx",
+    "icon": "./assets/images/icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "imageWidth": 200,
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "fonts": [
+      {
+        "asset": "./assets/fonts/Vidaloka-Regular.ttf"
+      }
+    ],
+    "newArchEnabled": true,
+    "plugins": [
+      "expo-asset",
+      "expo-router"
+    ]
+  }
+}
