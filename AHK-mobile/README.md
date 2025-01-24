@@ -89,6 +89,7 @@ Expo es un framework y una plataforma que facilita el desarrollo, la creación y
 ### **1. Instalación de Expo CLI**
 Asegúrate de tener instalado **Node.js**. Luego, instala Expo CLI globalmente:  
 ```bash
+
 npm install -g expo-cli
 
 npx expo start para lanzar la app a ambiente de desarrollo, despues le indicas en que software siendo el usado IOS y con r en terminal reseteas la app que es como el refresh de Web.
