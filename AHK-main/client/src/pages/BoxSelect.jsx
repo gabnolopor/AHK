@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
 import '../styles/boxStyles.css';
+import { useNavigate } from 'react-router-dom';
 
 function BoxSelect() {
   const [isHovering, setIsHovering] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [lastTouchedBox, setLastTouchedBox] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -58,6 +60,12 @@ function BoxSelect() {
     }
   };
 
+  const handleBoxClick = (text) => {
+    if (text === 'Music') {
+      navigate('/music');
+    }
+  };
+
   return (
     <div 
       className="box__wrapper"
@@ -66,8 +74,9 @@ function BoxSelect() {
       <div className="video-container">
         <video autoPlay muted loop playsInline className="background-video">
           <source src="/bgPremier.mp4" type="video/mp4" />
-          Tu navegador no soporta el elemento video.
         </video>
+        <img src="/frame.png" className="frame-overlay" alt="decorative frame" />
+        <img src="/andrewlogo.png" className="logo" alt="logo" />
       </div>
 
       <div className="boxes__grid">
@@ -82,6 +91,7 @@ function BoxSelect() {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onTouchStart={() => handleTouchStart(index)}
+            onClick={() => handleBoxClick(text)}
           >
             <div className="hover-modal">{text}</div>
           </div>
