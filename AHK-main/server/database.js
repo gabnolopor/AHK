@@ -21,7 +21,9 @@ const conexion = {
         try {
             const connectionString = process.env.DB_URI;
             
-            await mongoose.connect(connectionString);
+            await mongoose.connect(connectionString, {
+                dbName: 'AHKDEV'
+            });
 
             dbLogger.info({
                 type: 'database_connection',
