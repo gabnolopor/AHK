@@ -59,6 +59,26 @@ function TestApi() {
 
             <section>
                 <h3>Photography ({data.photography.length})</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
+                    {data.photography.map((photo) => (
+                        <div key={photo._id} style={{ border: '1px solid #ccc', padding: '10px' }}>
+                            <img 
+                                src={photo.imageUrl} 
+                                alt={photo.name}
+                                style={{ width: '100%', height: 'auto' }}
+                                onLoad={() => console.log('Image loaded:', photo.name)}
+                                onError={(e) => {
+                                    console.error('Image failed to load:', photo.name);
+                                    console.error('URL:', photo.imageUrl);
+                                }}
+                            />
+                            <p>Name: {photo.name}</p>
+                            <p>Description: {photo.description}</p>
+                            <p>Filename: {photo.filename}</p>
+                            <p style={{ wordBreak: 'break-all' }}>URL: {photo.imageUrl}</p>
+                        </div>
+                    ))}
+                </div>
                 <pre>{JSON.stringify(data.photography, null, 2)}</pre>
             </section>
 
