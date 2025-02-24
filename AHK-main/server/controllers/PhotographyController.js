@@ -1,4 +1,5 @@
 const Photography = require('../models/Photography');
+const { cloudinary } = require('../utils/cloudinary');
 const { createModuleLogger } = require('../utils/logger');
 
 const photographyLogger = createModuleLogger('photography-controller');
@@ -6,15 +7,29 @@ const photographyLogger = createModuleLogger('photography-controller');
 const photographyController = {
     getAllPhotography: async (req, res) => {
         try {
-            console.log('Attempting to fetch photography...');
             const photography = await Photography.find({});
-            console.log('Fetched photography:', photography);
-            photographyLogger.info({
-                type: 'fetch_all_photography',
-                count: photography.length,
-                photography: photography
+            
+            // Transform the data to include correct Cloudinary URLs
+            const photographyWithUrls = photography.map(photo => {
+                // Remove .jpg extension if present and add samples/ prefix
+                const publicId = `samples/${photo.filename.replace('.jpg', '')}`;
+                
+                const imageUrl = cloudinary.url(publicId, {
+                    cloud_name: process.env.CLOUDINARY_NAME,
+                    secure: true,
+                    format: 'jpg'  // Specify format explicitly
+                });
+
+                return {
+                    ...photo.toObject(),
+                    imageUrl,
+                    publicId
+                };
             });
-            res.json(photography);
+
+            console.log('Photos with URLs:', photographyWithUrls); // Debug log
+            
+            res.json(photographyWithUrls);
         } catch (error) {
             console.error('Error details:', error);
             photographyLogger.error({

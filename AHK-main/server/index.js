@@ -5,7 +5,9 @@ const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const multer = require("multer");
+require('dotenv').config();
 const { logger, createModuleLogger } = require("./utils/logger");
+const { testConnection } = require('./utils/cloudinary');
 
 //rutas de contenido
 const writingsRoutes = require("./routes/WritingsRoutes");
@@ -228,13 +230,16 @@ app.get("/api/debug", async (req, res) => {
 //inicio del servidor
 const puerto = process.env.PORT || 3000;
 
-app.listen(puerto, () => {
+app.listen(puerto, async () => {
   appLogger.info({
     type: "server_start",
     port: puerto,
     environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString(),
   });
+
+  // Test Cloudinary connection
+  await testConnection();
 });
 
 //cierre del servidor
