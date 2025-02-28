@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/landPage.css';
+import '../styles/landpage.css';
 import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
@@ -48,6 +48,7 @@ const Header = () => {
     return (
         <div className="encabezado">
             <div className="imagen-container">
+                <h1 className="works-static">WORKS</h1>
                 <img src="/landpage.png" className="encabezado__imagen" alt="background" />
                 <h1 className="encabezado__titulo">
                     <span 
