@@ -9,6 +9,8 @@ import MusicPage from './pages/MusicPage';
 import Admin from './pages/Admin';
 import PrivateRoute from './components/PrivateRoute';
 import TestApi from './components/TestApi';
+import ComingSoon from './pages/ComingSoon';
+
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
         <Route path="/credits" element={<Credits />} />
         <Route path="/music" element={<MusicPage />} />
         <Route path="/admin/login" element={<Admin />} />
+        <Route path="/comingsoon" element={<ComingSoon />} />
+
         <Route 
           path="/admin" 
           element={
