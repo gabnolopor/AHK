@@ -143,3 +143,21 @@ body {
 .parallax-layer-1 { transform: translateZ(-10px); }
 .parallax-layer-2 { transform: translateZ(-20px); }
 .parallax-layer-3 { transform: translateZ(-30px); }
+
+.works-static {
+    position: absolute;
+    top: 10%;
+    left: 53%;
+    transform: translateX(-50%);
+    font-family: Monserrat;
+    font-size: 2.5rem;
+    color: #61482e;
+    z-index: 10;
+    text-transform: uppercase;
+    letter-spacing: 0.5rem;
+    font-weight: bold;
+    mix-blend-mode: multiply;
+    text-shadow: 
+        3px 3px 0 rgba(139, 69, 19, 0.5),
+        4px 4px 5px rgba(0, 0, 0, 0.2);
+}
