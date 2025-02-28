@@ -1,0 +1,38 @@
+body{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.coming__container{ 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/coming.jpg');   
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.coming__content{
+    text-align: center;
+    font-family: Monserrat;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+    max-width: 400px;
+    width: 100%;
+}
+
+.coming__title{
+    font-size: 2rem;
+    letter-spacing: 0.1rem;
+    margin-bottom: 1rem;
+}
+
+.coming__description{
+    font-size: 1rem;
+}   
+
