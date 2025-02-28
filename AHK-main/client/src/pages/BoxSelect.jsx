@@ -61,10 +61,16 @@ function BoxSelect() {
     }
   };
 
-  const handleBoxClick = (text) => {
+   const handleBoxClick = (text) => {
     if (text === 'Music') {
       navigate('/music');
     }
+    if (text === 'Coming') {
+      navigate('/comingsoon');
+    } 
+    if (text === 'Soon') {
+      navigate('/comingsoon');
+    } 
     
     
   };
