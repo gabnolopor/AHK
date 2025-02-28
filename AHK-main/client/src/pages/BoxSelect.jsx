@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/boxStyles.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -64,6 +65,8 @@ function BoxSelect() {
     if (text === 'Music') {
       navigate('/music');
     }
+    
+    
   };
 
   return (
@@ -76,13 +79,13 @@ function BoxSelect() {
           <source src="/bgPremier.mp4" type="video/mp4" />
         </video>
         <img src="/frame.png" className="frame-overlay" alt="decorative frame" />
-        <img src="/andrewlogo.png" className="logo" alt="logo" />
+       <Link to="/"> <img src="/andrewlogo.png" className="logo" alt="logo" /></Link>
       </div>
 
       <div className="boxes__grid">
         {[
-          'Music', 'Photo', 'Art', 'Writings',
-          'Credits', 'Design', 'New Section 1', 'New Section 2'
+          'Music', 'Photography', 'Art', 'Writings',
+          'DesignS', 'Credits', 'Comming', 'Soon'
         ].map((text, index) => (
           <div 
             key={index}
