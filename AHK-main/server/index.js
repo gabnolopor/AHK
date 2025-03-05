@@ -14,6 +14,7 @@ const writingsRoutes = require("./routes/WritingsRoutes");
 const paintingsRoutes = require("./routes/PaintingsRoutes");
 const photographyRoutes = require("./routes/PhotographyRoutes");
 const musicRoutes = require("./routes/MusicRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 //configuración
 const mongoose = require("mongoose");
@@ -157,7 +158,7 @@ app.use("/api", writingsRoutes);
 app.use("/api", paintingsRoutes);
 app.use("/api", photographyRoutes);
 app.use("/api", musicRoutes);
-
+app.use("/api", adminRoutes);
 //testing
 app.get("/test", (req, res) => {
   res.json({ message: "Test route working" });
@@ -225,6 +226,26 @@ app.get("/api/debug", async (req, res) => {
     console.error("Debug route error:", error);
     res.json({ error: error.message, stack: error.stack });
   }
+});
+
+// Add this near your other test routes
+app.get("/api/test-cloudinary", async (req, res) => {
+    try {
+        const testResult = await testConnection();
+        res.json({
+            success: testResult,
+            config: {
+                cloudName: process.env.CLOUDINARY_NAME,
+                hasApiKey: !!process.env.CLOUDINARY_API_KEY,
+                hasSecret: !!process.env.CLOUDINARY_SECRET
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
 });
 
 //inicio del servidor

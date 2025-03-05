@@ -11,13 +11,12 @@ const photographyController = {
             
             // Transform the data to include correct Cloudinary URLs
             const photographyWithUrls = photography.map(photo => {
-                // Remove .jpg extension if present and add samples/ prefix
-                const publicId = `samples/${photo.filename.replace('.jpg', '')}`;
+
+                const publicId = photo.filename;
                 
                 const imageUrl = cloudinary.url(publicId, {
                     cloud_name: process.env.CLOUDINARY_NAME,
                     secure: true,
-                    format: 'jpg'  // Specify format explicitly
                 });
 
                 return {
@@ -64,29 +63,47 @@ const photographyController = {
 
     addPhotography: async (req, res) => {
         try {
-            const { name, description } = req.body;
-            const filename = req.file ? req.file.filename : null;
-
-            if (!filename) {
-                return res.status(400).json({ error: 'File is required' });
+            if (!req.file) {
+                photographyLogger.error({
+                    type: 'add_photography_error',
+                    error: 'No file provided'
+                });
+                return res.status(400).json({ error: 'No file provided' });
             }
 
+            // Upload to Cloudinary in samples folder
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'photography',    
+                resource_type: 'image',
+                use_filename: true,
+                unique_filename: true
+            });
+
+            photographyLogger.info({
+                type: 'cloudinary_upload_success',
+                publicId: result.public_id,
+                url: result.secure_url
+            });
+
+            // Create new photography entry with Cloudinary data
             const newPhotography = new Photography({
-                name,
-                description,
-                filename
+                filename: result.public_id, // This will now include 'samples/' prefix
+                name: req.body.name,
+                description: req.body.description
             });
 
             await newPhotography.save();
             photographyLogger.info({
                 type: 'photography_added',
-                photographyId: newPhotography._id
+                photographyId: newPhotography._id,
+                cloudinaryId: result.public_id
             });
             res.status(201).json(newPhotography);
         } catch (error) {
             photographyLogger.error({
                 type: 'add_photography_error',
-                error: error.message
+                error: error.message,
+                stack: error.stack
             });
             res.status(500).json({ error: 'Error adding photography' });
         }
@@ -99,15 +116,25 @@ const photographyController = {
                 name: req.body.name,
                 description: req.body.description
             };            
+    
+            // If there's a new file, upload it to Cloudinary first
             if (req.file) {
-                updates.filename = req.file.filename;
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'photography',    
+                    resource_type: 'image',
+                    use_filename: true,
+                    unique_filename: true
+                });
+    
+                // Update with new Cloudinary filename
+                updates.filename = result.public_id;
             }
-
+    
             const photography = await Photography.findByIdAndUpdate(id, updates, { new: true });
             if (!photography) {
                 return res.status(404).json({ error: 'Photography not found' });
             }
-
+    
             photographyLogger.info({
                 type: 'photography_updated',
                 photographyId: id
@@ -125,10 +152,24 @@ const photographyController = {
     deletePhotography: async (req, res) => {
         try {
             const { id } = req.params;
-            const photography = await Photography.findByIdAndDelete(id);
+            
+            // First, get the photography item to get the Cloudinary public_id
+            const photography = await Photography.findById(id);
             if (!photography) {
                 return res.status(404).json({ error: 'Photography not found' });
             }
+
+            // Delete from Cloudinary first
+            if (photography.filename) {
+                await cloudinary.uploader.destroy(photography.filename);
+                photographyLogger.info({
+                    type: 'cloudinary_delete_success',
+                    publicId: photography.filename
+                });
+            }
+
+            // Then delete from database
+            await Photography.findByIdAndDelete(id);
 
             photographyLogger.info({
                 type: 'photography_deleted',

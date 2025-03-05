@@ -1,4 +1,5 @@
 const Writings = require('../models/Writings');
+const { cloudinary } = require('../utils/cloudinary');
 const { createModuleLogger } = require('../utils/logger');
 
 const writingsLogger = createModuleLogger('writings-controller');
@@ -6,15 +7,28 @@ const writingsLogger = createModuleLogger('writings-controller');
 const writingsController = {
     getAllWritings: async (req, res) => {
         try {
-            console.log('Attempting to fetch writings...');
             const writings = await Writings.find({});
-            console.log('Fetched writings:', writings);
-            writingsLogger.info({
-                type: 'fetch_all_writings',
-                count: writings.length,
-                writings: writings
+            
+            // Transform the data to include correct Cloudinary URLs
+            const writingsWithUrls = writings.map(writing => {
+                const publicId = writing.filename;
+                
+                const imageUrl = cloudinary.url(publicId, {
+                    cloud_name: process.env.CLOUDINARY_NAME,
+                    resource_type: 'raw',
+                    secure: true
+                });
+
+                return {
+                    ...writing.toObject(),
+                    imageUrl,
+                    publicId
+                };
             });
-            res.json(writings);
+
+            console.log('Writings with URLs:', writingsWithUrls); // Debug log
+            
+            res.json(writingsWithUrls);
         } catch (error) {
             console.error('Error details:', error);
             writingsLogger.error({
@@ -49,29 +63,47 @@ const writingsController = {
 
     addWriting: async (req, res) => {
         try {
-            const { name } = req.body;
-            const filename = req.file ? req.file.filename : null;
-
-            if (!filename) {
-                return res.status(400).json({ error: 'File is required' });
+            if (!req.file) {
+                writingsLogger.error({
+                    type: 'add_writing_error',
+                    error: 'No file provided'
+                });
+                return res.status(400).json({ error: 'No file provided' });
             }
 
+            // Upload to Cloudinary in samples folder
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'writings',    
+                resource_type: 'raw',
+                use_filename: true,
+                unique_filename: true
+            });
+
+            writingsLogger.info({
+                type: 'cloudinary_upload_success',
+                publicId: result.public_id,
+                url: result.secure_url
+            });
+
+            // Create new writing entry with Cloudinary data
             const newWriting = new Writings({
-                name,
-                filename,
-                cover: req.body.cover
+                filename: result.public_id,
+                name: req.body.name,
+                genre: req.body.genre  // Add genre
             });
 
             await newWriting.save();
             writingsLogger.info({
                 type: 'writing_added',
-                writingId: newWriting._id
+                writingId: newWriting._id,
+                cloudinaryId: result.public_id
             });
             res.status(201).json(newWriting);
         } catch (error) {
             writingsLogger.error({
                 type: 'add_writing_error',
-                error: error.message
+                error: error.message,
+                stack: error.stack
             });
             res.status(500).json({ error: 'Error adding writing' });
         }
@@ -82,11 +114,20 @@ const writingsController = {
             const { id } = req.params;
             const updates = {
                 name: req.body.name,
-                cover: req.body.cover
-            };
-            
+                genre: req.body.genre  // Add genre
+            };            
+
+            // If there's a new file, upload it to Cloudinary first
             if (req.file) {
-                updates.filename = req.file.filename;
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'writings',    
+                    resource_type: 'raw',
+                    use_filename: true,
+                    unique_filename: true
+                });
+
+                // Update with new Cloudinary filename
+                updates.filename = result.public_id;
             }
 
             const writing = await Writings.findByIdAndUpdate(id, updates, { new: true });
@@ -111,10 +152,24 @@ const writingsController = {
     deleteWriting: async (req, res) => {
         try {
             const { id } = req.params;
-            const writing = await Writings.findByIdAndDelete(id);
+            
+            // First, get the writing item to get the Cloudinary public_id
+            const writing = await Writings.findById(id);
             if (!writing) {
                 return res.status(404).json({ error: 'Writing not found' });
             }
+
+            // Delete from Cloudinary first
+            if (writing.filename) {
+                await cloudinary.uploader.destroy(writing.filename);
+                writingsLogger.info({
+                    type: 'cloudinary_delete_success',
+                    publicId: writing.filename
+                });
+            }
+
+            // Then delete from database
+            await Writings.findByIdAndDelete(id);
 
             writingsLogger.info({
                 type: 'writing_deleted',

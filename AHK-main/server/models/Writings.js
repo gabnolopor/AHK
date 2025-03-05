@@ -11,7 +11,13 @@ const writingsSchema = new mongoose.Schema({
     },
     cover: {
         type: String,
-        required: true
+        required: false,
+        default: ''
+    },
+    genre: {
+        type: String,
+        required: true,
+        default: ''
     }
 }, {
     timestamps: true,

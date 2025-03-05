@@ -1,4 +1,5 @@
 const Paintings = require('../models/Paintings');
+const { cloudinary } = require('../utils/cloudinary');
 const { createModuleLogger } = require('../utils/logger');
 
 const paintingsLogger = createModuleLogger('paintings-controller');
@@ -6,15 +7,27 @@ const paintingsLogger = createModuleLogger('paintings-controller');
 const paintingsController = {
     getAllPaintings: async (req, res) => {
         try {
-            console.log('Attempting to fetch paintings...');
             const paintings = await Paintings.find({});
-            console.log('Fetched paintings:', paintings);
-            paintingsLogger.info({
-                type: 'fetch_all_paintings',
-                count: paintings.length,
-                paintings: paintings
+            
+            // Transform the data to include correct Cloudinary URLs
+            const paintingsWithUrls = paintings.map(painting => {
+                const publicId = painting.filename;
+                
+                const imageUrl = cloudinary.url(publicId, {
+                    cloud_name: process.env.CLOUDINARY_NAME,
+                    secure: true
+                });
+
+                return {
+                    ...painting.toObject(),
+                    imageUrl,
+                    publicId
+                };
             });
-            res.json(paintings);
+
+            console.log('Paintings with URLs:', paintingsWithUrls); // Debug log
+            
+            res.json(paintingsWithUrls);
         } catch (error) {
             console.error('Error details:', error);
             paintingsLogger.error({
@@ -49,29 +62,47 @@ const paintingsController = {
 
     addPainting: async (req, res) => {
         try {
-            const { name, description } = req.body;
-            const filename = req.file ? req.file.filename : null;
-
-            if (!filename) {
-                return res.status(400).json({ error: 'File is required' });
+            if (!req.file) {
+                paintingsLogger.error({
+                    type: 'add_painting_error',
+                    error: 'No file provided'
+                });
+                return res.status(400).json({ error: 'No file provided' });
             }
 
+            // Upload to Cloudinary in samples folder
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'paintings',    
+                resource_type: 'image',
+                use_filename: true,
+                unique_filename: true
+            });
+
+            paintingsLogger.info({
+                type: 'cloudinary_upload_success',
+                publicId: result.public_id,
+                url: result.secure_url
+            });
+
+            // Create new painting entry with Cloudinary data
             const newPainting = new Paintings({
-                name,
-                description,
-                filename
+                filename: result.public_id, // This will now include 'samples/' prefix
+                name: req.body.name,
+                description: req.body.description
             });
 
             await newPainting.save();
             paintingsLogger.info({
                 type: 'painting_added',
-                paintingId: newPainting._id
+                paintingId: newPainting._id,
+                cloudinaryId: result.public_id
             });
             res.status(201).json(newPainting);
         } catch (error) {
             paintingsLogger.error({
                 type: 'add_painting_error',
-                error: error.message
+                error: error.message,
+                stack: error.stack
             });
             res.status(500).json({ error: 'Error adding painting' });
         }
@@ -84,8 +115,18 @@ const paintingsController = {
                 name: req.body.name,
                 description: req.body.description
             };            
+
+            // If there's a new file, upload it to Cloudinary first
             if (req.file) {
-                updates.filename = req.file.filename;
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'paintings',    
+                    resource_type: 'image',
+                    use_filename: true,
+                    unique_filename: true
+                });
+
+                // Update with new Cloudinary filename
+                updates.filename = result.public_id;
             }
 
             const painting = await Paintings.findByIdAndUpdate(id, updates, { new: true });
@@ -110,10 +151,24 @@ const paintingsController = {
     deletePainting: async (req, res) => {
         try {
             const { id } = req.params;
-            const painting = await Paintings.findByIdAndDelete(id);
+            
+            // First, get the painting item to get the Cloudinary public_id
+            const painting = await Paintings.findById(id);
             if (!painting) {
                 return res.status(404).json({ error: 'Painting not found' });
             }
+
+            // Delete from Cloudinary first
+            if (painting.filename) {
+                await cloudinary.uploader.destroy(painting.filename);
+                paintingsLogger.info({
+                    type: 'cloudinary_delete_success',
+                    publicId: painting.filename
+                });
+            }
+
+            // Then delete from database
+            await Paintings.findByIdAndDelete(id);
 
             paintingsLogger.info({
                 type: 'painting_deleted',

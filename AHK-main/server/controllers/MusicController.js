@@ -1,4 +1,5 @@
 const Music = require('../models/Music');
+const { cloudinary } = require('../utils/cloudinary');
 const { createModuleLogger } = require('../utils/logger');
 
 const musicLogger = createModuleLogger('music-controller');
@@ -6,15 +7,28 @@ const musicLogger = createModuleLogger('music-controller');
 const musicController = {
     getAllMusic: async (req, res) => {
         try {
-            console.log('Attempting to fetch music...');
             const music = await Music.find({});
-            console.log('Fetched music:', music);
-            musicLogger.info({
-                type: 'fetch_all_music',
-                count: music.length,
-                music: music
+            
+            // Transform the data to include correct Cloudinary URLs
+            const musicWithUrls = music.map(track => {
+                const publicId = track.filename;
+                
+                const imageUrl = cloudinary.url(publicId, {
+                    cloud_name: process.env.CLOUDINARY_NAME,
+                    resource_type: 'video',
+                    secure: true
+                });
+
+                return {
+                    ...track.toObject(),
+                    imageUrl,
+                    publicId
+                };
             });
-            res.json(music);
+
+            console.log('Music with URLs:', musicWithUrls); // Debug log
+            
+            res.json(musicWithUrls);
         } catch (error) {
             console.error('Error details:', error);
             musicLogger.error({
@@ -49,29 +63,47 @@ const musicController = {
 
     addMusic: async (req, res) => {
         try {
-            const { name, cover } = req.body;
-            const filename = req.file ? req.file.filename : null;
-
-            if (!filename) {
-                return res.status(400).json({ error: 'File is required' });
+            if (!req.file) {
+                musicLogger.error({
+                    type: 'add_music_error',
+                    error: 'No file provided'
+                });
+                return res.status(400).json({ error: 'No file provided' });
             }
 
+            // Upload to Cloudinary in music folder
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'music',    
+                resource_type: 'video',  // Use 'video' for audio files
+                use_filename: true,
+                unique_filename: true
+            });
+
+            musicLogger.info({
+                type: 'cloudinary_upload_success',
+                publicId: result.public_id,
+                url: result.secure_url
+            });
+
+            // Create new music entry with Cloudinary data and genre
             const newMusic = new Music({
-                name,
-                cover,
-                filename
+                filename: result.public_id,
+                name: req.body.name,
+                genre: req.body.genre  // Add genre
             });
 
             await newMusic.save();
             musicLogger.info({
                 type: 'music_added',
-                musicId: newMusic._id
+                musicId: newMusic._id,
+                cloudinaryId: result.public_id
             });
             res.status(201).json(newMusic);
         } catch (error) {
             musicLogger.error({
                 type: 'add_music_error',
-                error: error.message
+                error: error.message,
+                stack: error.stack
             });
             res.status(500).json({ error: 'Error adding music' });
         }
@@ -82,10 +114,20 @@ const musicController = {
             const { id } = req.params;
             const updates = {
                 name: req.body.name,
-                cover: req.body.cover
+                genre: req.body.genre  // Add genre
             };            
+
+            // If there's a new file, upload it to Cloudinary first
             if (req.file) {
-                updates.filename = req.file.filename;
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'music',    
+                    resource_type: 'video',  // Use 'video' for audio files
+                    use_filename: true,
+                    unique_filename: true
+                });
+
+                // Update with new Cloudinary filename
+                updates.filename = result.public_id;
             }
 
             const music = await Music.findByIdAndUpdate(id, updates, { new: true });
@@ -110,10 +152,24 @@ const musicController = {
     deleteMusic: async (req, res) => {
         try {
             const { id } = req.params;
-            const music = await Music.findByIdAndDelete(id);
+            
+            // First, get the music item to get the Cloudinary public_id
+            const music = await Music.findById(id);
             if (!music) {
                 return res.status(404).json({ error: 'Music not found' });
             }
+
+            // Delete from Cloudinary first
+            if (music.filename) {
+                await cloudinary.uploader.destroy(music.filename, { resource_type: 'video' });
+                musicLogger.info({
+                    type: 'cloudinary_delete_success',
+                    publicId: music.filename
+                });
+            }
+
+            // Then delete from database
+            await Music.findByIdAndDelete(id);
 
             musicLogger.info({
                 type: 'music_deleted',

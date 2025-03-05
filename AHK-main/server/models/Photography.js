@@ -13,6 +13,7 @@ const photographySchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    imageUrl: String,
 }, {
     timestamps: true,
     collection: 'Photography'  // Changed to match the actual collection name case
