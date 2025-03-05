@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LandPage from './pages/LandPage';
 import BoxSelect from './pages/BoxSelect';
@@ -9,8 +10,7 @@ import MusicPage from './pages/MusicPage';
 import Admin from './pages/Admin';
 import PrivateRoute from './components/PrivateRoute';
 import TestApi from './components/TestApi';
-import ComingSoon from './pages/ComingSoon';
-
+import TextContentPage from './components/TextContentPage';
 
 function App() {
   return (
@@ -25,8 +25,6 @@ function App() {
         <Route path="/credits" element={<Credits />} />
         <Route path="/music" element={<MusicPage />} />
         <Route path="/admin/login" element={<Admin />} />
-        <Route path="/comingsoon" element={<ComingSoon />} />
-
         <Route 
           path="/admin" 
           element={
@@ -35,6 +33,7 @@ function App() {
             </PrivateRoute>
           } 
         />
+        <Route path="/text-content" element={<TextContentPage />} />
       </Routes>
     </BrowserRouter>
   );

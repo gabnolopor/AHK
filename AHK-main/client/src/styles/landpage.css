@@ -144,20 +144,40 @@ body {
 .parallax-layer-2 { transform: translateZ(-20px); }
 .parallax-layer-3 { transform: translateZ(-30px); }
 
-.works-static {
-    position: absolute;
-    top: 10%;
-    left: 53%;
-    transform: translateX(-50%);
-    font-family: Monserrat;
-    font-size: 2.5rem;
-    color: #61482e;
-    z-index: 10;
-    text-transform: uppercase;
-    letter-spacing: 0.5rem;
-    font-weight: bold;
-    mix-blend-mode: multiply;
-    text-shadow: 
-        3px 3px 0 rgba(139, 69, 19, 0.5),
-        4px 4px 5px rgba(0, 0, 0, 0.2);
+/* Control Panel Button Styles */
+.control-panel-button {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(
+    270deg,
+    var(--full-wine),
+    var(--full-red),
+    var(--dark-wine),
+    var(--full-wine)
+  );
+  background-size: 300% 100%;
+  background-position: 0% 50%;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-family: 'Anton-Regular';
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.control-panel-button:hover {
+  background-position: 100% 50%;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.control-panel-button svg {
+  font-size: 1.2rem;
 }

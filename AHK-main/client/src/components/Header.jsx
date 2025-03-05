@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/landpage.css';
+import '../styles/landPage.css';
 import { useNavigate } from 'react-router-dom';
+import { FiSettings } from 'react-icons/fi';
 
 const Header = () => {
     const navigate = useNavigate();
+    const isAuthenticated = localStorage.getItem('isAdminAuthenticated') === 'true';
     const palabras = [
         'Works',    // English
         'Obras',    // Spanish
@@ -48,7 +50,6 @@ const Header = () => {
     return (
         <div className="encabezado">
             <div className="imagen-container">
-                <h1 className="works-static">WORKS</h1>
                 <img src="/landpage.png" className="encabezado__imagen" alt="background" />
                 <h1 className="encabezado__titulo">
                     <span 
@@ -59,6 +60,14 @@ const Header = () => {
                     </span>
                 </h1>
             </div>
+            {isAuthenticated && (
+                <button 
+                    className="control-panel-button"
+                    onClick={() => navigate('/admin')}
+                >
+                    <FiSettings /> Control Panel
+                </button>
+            )}
         </div>
     );
 };

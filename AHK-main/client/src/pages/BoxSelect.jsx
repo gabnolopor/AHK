@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import '../styles/boxStyles.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -61,18 +60,18 @@ function BoxSelect() {
     }
   };
 
-   const handleBoxClick = (text) => {
-    if (text === 'Music') {
-      navigate('/music');
+  const handleBoxClick = (text) => {
+    const routes = {
+      'Music': '/music',
+      'Photo': '/photoroom',
+      'Art': '/artroom',
+      'Writings': '/writings',
+      'Credits': '/credits'
+    };
+
+    if (routes[text]) {
+      navigate(routes[text]);
     }
-    if (text === 'Coming') {
-      navigate('/comingsoon');
-    } 
-    if (text === 'Soon') {
-      navigate('/comingsoon');
-    } 
-    
-    
   };
 
   return (
@@ -85,13 +84,13 @@ function BoxSelect() {
           <source src="/bgPremier.mp4" type="video/mp4" />
         </video>
         <img src="/frame.png" className="frame-overlay" alt="decorative frame" />
-       <Link to="/"> <img src="/andrewlogo.png" className="logo" alt="logo" /></Link>
+        <img src="/andrewlogo.png" className="logo" alt="logo" />
       </div>
 
       <div className="boxes__grid">
         {[
-          'Music', 'Photography', 'Art', 'Writings',
-          'Designs', 'Credits', 'Coming', 'Soon'
+          'Music', 'Photo', 'Art', 'Writings',
+          'Credits', 'Design', 'New Section 1', 'New Section 2'
         ].map((text, index) => (
           <div 
             key={index}

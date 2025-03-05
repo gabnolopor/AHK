@@ -1,0 +1,171 @@
+.art-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: none;
+  overflow: hidden;
+  position: relative;
+}
+
+.carousel-wrapper {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: url("/public/floral_wall.jpg") center center;
+  background-size: cover;
+}
+
+.carousel-track {
+  display: flex;
+  height: 100%;
+  transition: transform 1s ease-in-out;
+}
+
+/* Main card container */
+.art-card {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  flex-shrink: 0; /* Prevent cards from shrinking */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Logo and frame container */
+.painting-container {
+  position: relative;
+  width: 30%;
+  height: 60%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 5rem 0;
+  transition: transform 1s ease-in-out; /* Add transition here */
+  cursor: pointer; /* Ensure the cursor indicates clickability */
+}
+
+.painting {
+  width: 85%;
+  height: 80%;
+  box-shadow: 0 70px 60px rgb(0, 0, 0);
+}
+
+/* Frame overlay */
+.frame-paintingOverlay {
+  width: 135%;
+  height: 120%;
+  z-index: 2;
+  position: absolute;
+}
+
+/* Content container */
+.art-card-content {
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  padding: 0 0 0 5rem;
+  margin: 0 10rem 0 0;
+}
+.art-card-content h2 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.carousel-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  position: absolute;
+  bottom: 40px; /* Move arrows to the bottom */
+  z-index: 10;
+}
+
+.carousel-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+  margin: 0 2rem;
+}
+
+.carousel-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.carousel-button span {
+  color: white;
+  font-size: 24px;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Optional: Add responsive design */
+@media (max-width: 768px) {
+  .art-card {
+    height: 90vh;
+  }
+
+  .painting-container {
+    width: 90%;
+    height: 90%;
+  }
+}
+
+.painting-modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.painting-modalOverlay.open {
+  opacity: 1;
+}
+
+.painting-modal {
+  width: 80%;
+  max-width: 1000px;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.painting-modalImage {
+  width: 100%;
+  max-height: 100vh;
+  display: block;
+}
+
+.imageClose-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: white;
+  border-radius: 30%;
+  color: #333;
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: color 0.3s;
+  display: flex;
+}
+
+.imageClose-button:hover {
+  color: #666;
+}

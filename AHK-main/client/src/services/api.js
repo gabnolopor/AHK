@@ -8,6 +8,14 @@ const handleApiError = (error) => {
     throw new Error(error.message || 'Network error');
 };
 
+// Map frontend types to backend endpoints
+const endpointMap = {
+    photo: 'photography',
+    artwork: 'paintings',
+    music: 'music',
+    writing: 'writings'
+};
+
 export const apiService = {
     // Writings
     getAllWritings: async () => {
@@ -41,8 +49,13 @@ export const apiService = {
 
     // Photography
     getAllPhotography: async () => {
-        const response = await fetch(`${API_URL}/photography`);
-        return response.json();
+        try {
+            const response = await fetch(`${API_URL}/photography`);
+            if (!response.ok) throw new Error('Failed to fetch photography');
+            return response.json();
+        } catch (error) {
+            handleApiError(error);
+        }
     },
     getPhotographyById: async (id) => {
         const response = await fetch(`${API_URL}/photography/${id}`);
@@ -51,8 +64,13 @@ export const apiService = {
 
     // Music
     getAllMusic: async () => {
-        const response = await fetch(`${API_URL}/music`);
-        return response.json();
+        try {
+            const response = await fetch(`${API_URL}/music`);
+            if (!response.ok) throw new Error('Failed to fetch music');
+            return response.json();
+        } catch (error) {
+            handleApiError(error);
+        }
     },
     getMusicById: async (id) => {
         const response = await fetch(`${API_URL}/music/${id}`);
@@ -60,28 +78,88 @@ export const apiService = {
     },
 
     // Generic POST method with file upload
-    uploadContent: async (type, data) => {
-        const formData = new FormData();
-        Object.keys(data).forEach(key => {
-            if (key === 'file') {
-                formData.append('file', data.file);
-            } else {
-                formData.append(key, data[key]);
-            }
-        });
-
-        const response = await fetch(`${API_URL}/${type}`, {
+    uploadContent: async (type, formData) => {
+        // Map frontend type to backend endpoint
+        const endpoint = endpointMap[type] || type;
+        
+        const response = await fetch(`${API_URL}/${endpoint}`, {
             method: 'POST',
-            body: formData
+            body: formData // FormData handles the content-type header automatically
         });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Upload failed');
+        }
         return response.json();
     },
 
     // Generic DELETE method
     deleteContent: async (type, id) => {
-        const response = await fetch(`${API_URL}/${type}/${id}`, {
+        const endpoint = endpointMap[type] || type;
+        
+        const response = await fetch(`${API_URL}/${endpoint}/${id}`, {
             method: 'DELETE'
         });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Delete failed');
+        }
         return response.json();
+    },
+
+    // Generic UPDATE method
+    updateContent: async (type, id, formData) => {
+        const endpoint = endpointMap[type] || type;
+        
+        const response = await fetch(`${API_URL}/${endpoint}/${id}`, {
+            method: 'PUT',
+            body: formData
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Update failed');
+        }
+        return response.json();
+    },
+
+    loginAdmin: async (credentials) => {
+        try {
+            const response = await fetch(`${API_URL}/admin/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(credentials)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Login failed');
+            }
+
+            const data = await response.json();
+            // Store the token in localStorage
+            localStorage.setItem('adminToken', data.token);
+            return data;
+        } catch (error) {
+            console.error('Login error:', error);
+            throw error;
+        }
+    },
+
+    verifyAdminToken: async () => {
+        const token = localStorage.getItem('adminToken');
+        if (!token) return false;
+
+        try {
+            const response = await fetch(`${API_URL}/admin/verify-token`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            return response.ok;
+        } catch (error) {
+            return false;
+        }
     }
 };
